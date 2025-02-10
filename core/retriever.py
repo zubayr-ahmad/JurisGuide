@@ -34,7 +34,6 @@ class DocumentRetriever:
                 os.makedirs(VECTOR_STORE_PATH)
             
             self.db = Chroma.from_documents(texts, self.embeddings, persist_directory=VECTOR_STORE_PATH)
-            self.db.persist()
         else:
             self.db = Chroma(persist_directory=VECTOR_STORE_PATH, embedding_function=self.embeddings)
 

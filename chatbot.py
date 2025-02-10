@@ -16,9 +16,10 @@ class Chatbot:
 
         # Generate response using retrieved content
         response = self.generator.generate_response(user_input, docs)
-
+        response_text = response.content
+        
         # Save chat history
-        self.db.save_chat(self.session_id, user_input, response)
+        self.db.save_chat(self.session_id, user_input, response_text)
 
         return response, docs
 

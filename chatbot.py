@@ -1,38 +1,36 @@
-from core.retriever import DocumentRetriever
-from core.models import ResponseGenerator
+from typing import Dict
 from core.database import ChatDatabase
+from core.models import create_workflow
+from config import HISTORY_CONTEXT
 import uuid
 
-class Chatbot:
-    def __init__(self, session_id=None):
+
+
+# Chat Interface
+class LangGraphChat:
+    def __init__(self):
+        self.workflow = create_workflow()
         self.db = ChatDatabase()
-        self.retriever = DocumentRetriever()  # Auto-loads processed docs
-        self.generator = ResponseGenerator()
+
+    def chat(self, user_input: str, session_id: str = None) -> Dict:
+        session_id = session_id or str(uuid.uuid4())
+        history = self.db.get_chat_history(session_id, limit=HISTORY_CONTEXT)
         
-        # Maintain session ID
-        if session_id is None:
-            self.session_id = str(uuid.uuid4())
-        else:
-            self.session_id = session_id
+        initial_state = {
+            "session_id": session_id,
+            "user_input": user_input,
+            "retrieved_docs": [],
+            "response": "",
+            "history": [{"user": h[0], "bot": h[1]} for h in history]
+        }
 
-    def chat(self, user_input):
-        """Handles a single chat interaction."""
-        # Retrieve relevant documents
-        docs = self.retriever.retrieve_documents(user_input)
-
-        # Generate response using retrieved content
-        response = self.generator.generate_response(user_input, docs)
-        response_text = response.content
-        
-        # Save chat history
-        self.db.save_chat(self.session_id, user_input, response_text)
-
-        return response_text, docs
-
-    def get_history(self):
-        """Fetches the entire chat history for the current session."""
-        return self.db.get_chat_history(self.session_id)
-
-    def get_all_sessions(self):
-        """Retrieves all previous sessions."""
-        return self.db.get_all_sessions()
+        result = self.workflow.invoke(initial_state)
+        return {
+            "session_id": session_id,
+            "response": result["response"],
+            "references": [{
+                "content": doc.page_content,
+                "metadata": doc.metadata
+            } for doc in result["retrieved_docs"]]
+        }
+    

@@ -3,10 +3,10 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_groq import ChatGroq
 from typing import List, Any, Dict, TypedDict, Annotated
 from langgraph.graph import StateGraph, END
-from database import ChatDatabase
-from retriever import DocumentRetriever
+from .database import ChatDatabase
+from .retriever import DocumentRetriever
 
-from ..config import LLM_API_KEY, LLM_MODEL, HISTORY_CONTEXT
+from .config import LLM_API_KEY, LLM_MODEL, HISTORY_CONTEXT
 
 # LLM Response Generation
 class ResponseGenerator:

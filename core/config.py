@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+
+# Load .env from the parent directory
+env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+load_dotenv(env_path)
 
 # Database and Vector Store paths
 DB_PATH = os.getenv("DB_PATH", "data/chat_history.db")

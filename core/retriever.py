@@ -4,7 +4,7 @@ from langchain.vectorstores import Chroma
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from typing import List, Any
-from ..config import PROCESSED_FOLDER, VECTOR_STORE_PATH, RETRIEVE_DOCS
+from .config import PROCESSED_FOLDER, VECTOR_STORE_PATH, RETRIEVE_DOCS
 # Document Retrieval Layer
 class DocumentRetriever:
     def __init__(self):

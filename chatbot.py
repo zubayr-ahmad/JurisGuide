@@ -1,7 +1,7 @@
 from typing import Dict
 from core.database import ChatDatabase
 from core.models import create_workflow
-from config import HISTORY_CONTEXT
+from core.config import HISTORY_CONTEXT
 import uuid
 
 

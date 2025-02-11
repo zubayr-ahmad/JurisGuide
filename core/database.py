@@ -1,6 +1,7 @@
 # Database Layer
-from ..config import DB_PATH, HISTORY_CONTEXT
 import sqlite3
+from typing import List
+from .config import DB_PATH, HISTORY_CONTEXT
 
 class ChatDatabase:
     def __init__(self):

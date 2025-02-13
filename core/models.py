@@ -44,7 +44,8 @@ class ChatNodes:
         context = "\n\n".join([doc.page_content for doc in state["reference_docs"]])
         history = "\n".join([f"User: {msg['user_message']}\nBot: {msg['response']}" 
                            for msg in state.get("history", [])[-HISTORY_CONTEXT:]])
-        
+        print("Context >>>>>>>>>>>>>>>>>>>>>>>>", context)
+        print("History >>>>>>>>>>>>>>>>>>>>>>>>", history)
         response = self.generator.generate_response(
             context=context,
             history=history,

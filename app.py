@@ -134,7 +134,7 @@ def main():
     
     # Display chat history
     with chat_container:
-        for i, msg in enumerate(current_chat['messages']):
+        for i, msg in enumerate(current_chat['messages'][::-1]):
             with st.chat_message("user_message"):
                 st.write(msg['user_message'])
             
@@ -145,8 +145,12 @@ def main():
                 if msg.get('reference_docs'):
                     with st.expander("📚 View References"):
                         for ref_idx, reference in enumerate(msg['reference_docs'], 1):
-                            st.markdown(f"**Reference {ref_idx}:**")
-                            st.json(reference)
+                            st.markdown(f"**Page Content:**\n> {reference['page_content']}")
+                            # st.markdown(f"**Metadata:**")
+                            st.markdown(f"- **Page:** {reference['metadata']['page_label']}")
+                            # st.markdown(f"- **Page Label:** {reference['metadata']['page_label']}")
+                            st.markdown(f"- **Source:** `{reference['metadata']['source']}`")
+                            st.markdown("---")  # Adds a separator between references
     
     # User input
     user_message = st.chat_input("Type your message here...")

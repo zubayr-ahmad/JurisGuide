@@ -77,7 +77,7 @@ class DocumentRetriever:
         # If we have new documents, process them and update the vector store
         if new_docs:
             print(f"Number of new documents to process: {len(new_docs)}")
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=300)
             texts = text_splitter.split_documents(new_docs)
             print(f"Created {len(texts)} chunks from new documents")
             

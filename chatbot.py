@@ -15,8 +15,8 @@ class LangGraphChat:
     def chat(self, user_message: str, session_id: str = None) -> Dict:
         session_id = session_id or str(uuid.uuid4())
         history = self.db.get_chat_history(session_id, limit=HISTORY_CONTEXT)
-        print("History >>>>>>>>>>>>>>>", history)
-        print("Session id >>>>>>>>>>>>>>>>>>>>>>>", session_id)
+        # print("History >>>>>>>>>>>>>>>", history)
+        # print("Session id >>>>>>>>>>>>>>>>>>>>>>>", session_id)
         initial_state = {
             "session_id": session_id,
             "user_message": user_message,

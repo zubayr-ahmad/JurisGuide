@@ -24,8 +24,8 @@ class ResponseGenerator:
 # LangGraph State Definition
 class ChatState(TypedDict):
     session_id: str
-    user_input: str
-    retrieved_docs: List[Any]
+    user_message: str
+    reference_docs: List[Any]
     response: str
     history: Annotated[List[Dict[str, str]], lambda x, y: x + y]
 
@@ -37,31 +37,33 @@ class ChatNodes:
         self.generator = ResponseGenerator()
 
     def retrieve_documents(self, state: ChatState) -> Dict:
-        docs = self.retriever.retrieve_documents(state["user_input"])
-        return {"retrieved_docs": docs}
+        docs = self.retriever.retrieve_documents(state["user_message"])
+        return {"reference_docs": docs}
 
     def generate_response(self, state: ChatState) -> Dict:
-        context = "\n\n".join([doc.page_content for doc in state["retrieved_docs"]])
-        history = "\n".join([f"User: {msg['user']}\nBot: {msg['bot']}" 
+        context = "\n\n".join([doc.page_content for doc in state["reference_docs"]])
+        history = "\n".join([f"User: {msg['user_message']}\nBot: {msg['response']}" 
                            for msg in state.get("history", [])[-HISTORY_CONTEXT:]])
         
         response = self.generator.generate_response(
             context=context,
             history=history,
-            query=state["user_input"]
+            query=state["user_message"]
         )
         return {"response": response}
 
     def save_conversation(self, state: ChatState) -> Dict:
         self.db.save_chat(
             state["session_id"],
-            state["user_input"],
-            state["response"]
+            state["user_message"],
+            state["response"],
+            reference_docs=state["reference_docs"]
         )
         return {
             "history": [{
-                "user": state["user_input"],
-                "bot": state["response"]
+                "user_message": state["user_message"],
+                "response": state["response"],
+                "reference_docs": state["reference_docs"]
             }]
         }
 

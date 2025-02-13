@@ -121,7 +121,7 @@ def main():
         st.session_state.current_session = next(iter(st.session_state.sessions))
     
     # Main chat interface
-    st.title("LangGraph Chatbot")
+    st.title("Chatbot")
     
     # Get current chat data
     current_chat = st.session_state.sessions[st.session_state.current_session]

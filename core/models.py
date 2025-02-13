@@ -16,9 +16,10 @@ class ResponseGenerator:
 
     def generate_response(self, context: str, history: str, query: str) -> str:
         messages = [
-            SystemMessage(content="You are an AI assistant. Provide accurate answers using the context. If unsure, say so."),
-            HumanMessage(content=f"Context:\n{context}\n\nHistory:\n{history}\n\nQuestion: {query}\nAnswer:")
+            SystemMessage(content="You are an AI assistant. Use the provided context to generate accurate answers. If the context is insufficient, state that you are unsure rather than guessing."),
+            HumanMessage(content=f"Context:\n{context}\n\nConversation History:\n{history}\n\nUser Query:\n{query}\n\nResponse:")
         ]
+
         return self.llm(messages).content
     
 # LangGraph State Definition

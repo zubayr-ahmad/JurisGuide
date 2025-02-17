@@ -26,11 +26,22 @@ class ResponseGenerator:
 
     def generate_response(self, context: str, history: str, query: str) -> str:
         messages = [
-            SystemMessage(content="You are an AI assistant. Use the provided context to generate accurate answers. If the user asks for clarification, provide additional information. If you are not provided with the context then respond accordingly"),
+            SystemMessage(content="""
+            You are an AI assistant with expertise in various topics, including legal definitions, documentation, and general knowledge.
+            
+            - If the user's query is related to **legal matters** (e.g., laws, regulations, contracts, legal definitions, compliance), respond in a **professional and informative** manner.
+            - Use the **provided context** if available to generate an **accurate and relevant** response.
+            - If the **context is missing**, use your general knowledge to answer.
+            - Use **conversation history** if relevant to maintain continuity.
+            - If the query is **ambiguous**, ask for clarification instead of assuming.
+
+            Always ensure that responses are **clear, concise, and factually correct**.
+            """),
             HumanMessage(content=f"Context:\n{context}\n\nConversation History:\n{history}\n\nUser Query:\n{query}\n\nResponse:")
         ]
 
         return self.llm(messages).content
+
     
     def custom_call(self, user_prompt, system_prompt=None):
         messages = [HumanMessage(content=user_prompt)]

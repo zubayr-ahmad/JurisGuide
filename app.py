@@ -156,24 +156,38 @@ def main():
     user_message = st.chat_input("Type your message here...")
     
     if user_message:
-        # Get chatbot response
         with st.spinner("Thinking..."):
-            try:
-                result = st.session_state.chatbot.chat(
-                    user_message,
-                    st.session_state.current_session
-                )
-                # print("Result >>>>>>>>>>>>>>>>>>>>>", result)
-                # Add to session history
-                current_chat['messages'].append({
-                    'user_message': user_message,
-                    'response': result['response'],
-                    'reference_docs': result.get('reference_docs', [])
-                })
+            # Create a container for the assistant's streaming response.
+            with st.chat_message("assistant"):
+                response_placeholder = st.empty()
+                full_response = ""
                 
-                st.rerun()
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
+                # Get the generator from your chatbot
+                response_generator = st.session_state.chatbot.chat(
+                    user_message, st.session_state.current_session
+                )
+                print(response_generator)
+                # Iterate over the streaming generator.
+                for update in response_generator:
+                    # If we received a chunk, update the placeholder.
+                    if "chunk" in update:
+                        full_response = update["full_response"]
+                        response_placeholder.markdown(full_response)
+                    # Optionally, process final payload metadata if available.
+                    if update.get("final"):
+                        # You can capture metadata here if needed.
+                        pass
+                
+            # Once streaming is done, add the message to the chat history.
+            current_chat['messages'].append({
+                'user_message': user_message,
+                'response': full_response,
+                # Update reference_docs if your generator returns them.
+                'reference_docs': update.get("reference_docs", [])
+            })
+            
+            # Rerun to refresh the chat history display.
+            st.rerun()
 
 if __name__ == "__main__":
     main()

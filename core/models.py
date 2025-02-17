@@ -49,18 +49,24 @@ class ChatNodes:
         docs = self.retriever.retrieve_documents(state["user_message"])
         return {"reference_docs": docs}
 
-    def generate_response(self, state: ChatState) -> Dict:
-        context = "\n\n".join([doc.page_content for doc in state["reference_docs"]])
-        history = "\n".join([f"User: {msg['user_message']}\nBot: {msg['response']}" 
-                           for msg in state.get("history", [])[-HISTORY_CONTEXT:]])
-        # print("Context >>>>>>>>>>>>>>>>>>>>>>>>", context)
-        # print("History >>>>>>>>>>>>>>>>>>>>>>>>", history)
-        response = self.generator.generate_response(
-            context=context,
-            history=history,
-            query=state["user_message"]
-        )
-        return {"response": response}
+    def generate_response(self, context: str, history: str, query: str) -> str:
+        messages = [
+            SystemMessage(content="""
+            You are an AI assistant with expertise in various topics, including legal definitions, documentation, and general knowledge.
+            
+            - If the user's query is related to **legal matters** (e.g., laws, regulations, contracts, legal definitions, compliance), respond in a **professional and informative** manner.
+            - Use the **provided context** if available to generate an **accurate and relevant** response.
+            - If the **context is missing**, use your general knowledge to answer.
+            - Use **conversation history** if relevant to maintain continuity.
+            - If the query is **ambiguous**, ask for clarification instead of assuming.
+
+            Always ensure that responses are **clear, concise, and factually correct**.
+            """),
+            HumanMessage(content=f"Context:\n{context}\n\nConversation History:\n{history}\n\nUser Query:\n{query}\n\nResponse:")
+        ]
+
+        return self.llm(messages).content
+
 
     def save_conversation(self, state: ChatState) -> Dict:
         self.db.save_chat(
@@ -82,17 +88,18 @@ class ChatNodes:
         prompt = f"""
         You are an AI assistant that determines whether a user's query requires retrieving external knowledge.
 
-        If the query is a greeting or a general conversational question (like "How are you?", or some general question), respond `False`.
-        If the query asks about specific knowledge (like documentation, facts, or other stored data), respond `True`.
+        Rules:
+        1. If the query is a greeting or a general conversational question (e.g., "How are you?", "What's up?"), respond `False`.
+        2. If the query is related to legal issues, definitions, or specific knowledge (e.g., "What is the definition of negligence?", "Explain copyright law"), respond `True`.
+        3. If the query is ambiguous or lacks sufficient information, respond `True` to ensure accurate retrieval.
+        4. For all other cases, respond `True` if the query requires factual or specific knowledge, otherwise `False`.
 
         Query: "{state['user_message']}"
-        Answer with 'True' if retrieval is needed, otherwise 'False'. It should be either of them in all cases
+        Answer with 'True' if retrieval is needed, otherwise 'False'. It should be either of them in all cases.
         """
 
         response = self.generator.custom_call(prompt)  
-        # print("Response from decider >>>>>>>>>>>>>>>>>>>>>>>>", response)
         state['requires_retrieval'] = "true" in response.lower().strip() 
-        # print("State", state)
         return state
 
 # LangGraph Workflow Setup with LLM Classification

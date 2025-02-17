@@ -1,0 +1,6 @@
+streamlit
+langchain
+chromadb
+sqlite3
+python-dotenv
+PyMuPDF

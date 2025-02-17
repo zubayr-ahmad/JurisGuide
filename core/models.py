@@ -60,23 +60,17 @@ class ChatNodes:
         docs = self.retriever.retrieve_documents(state["user_message"])
         return {"reference_docs": docs}
 
-    def generate_response(self, context: str, history: str, query: str) -> str:
-        messages = [
-            SystemMessage(content="""
-            You are an AI assistant with expertise in various topics, including legal definitions, documentation, and general knowledge.
-            
-            - If the user's query is related to **legal matters** (e.g., laws, regulations, contracts, legal definitions, compliance), respond in a **professional and informative** manner.
-            - Use the **provided context** if available to generate an **accurate and relevant** response.
-            - If the **context is missing**, use your general knowledge to answer.
-            - Use **conversation history** if relevant to maintain continuity.
-            - If the query is **ambiguous**, ask for clarification instead of assuming.
+    def generate_response(self, state: ChatState) -> Dict:
+        context = "\n\n".join([doc.page_content for doc in state["reference_docs"]])
+        history = "\n".join([f"User: {msg['user_message']}\nBot: {msg['response']}" 
+                           for msg in state.get("history", [])[-HISTORY_CONTEXT:]])
+        response = self.generator.generate_response(
+            context=context,
+            history=history,
+            query=state["user_message"]
+        )
+        return {"response": response}    
 
-            Always ensure that responses are **clear, concise, and factually correct**.
-            """),
-            HumanMessage(content=f"Context:\n{context}\n\nConversation History:\n{history}\n\nUser Query:\n{query}\n\nResponse:")
-        ]
-
-        return self.llm(messages).content
 
 
     def save_conversation(self, state: ChatState) -> Dict:

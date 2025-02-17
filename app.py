@@ -89,7 +89,7 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.header("Chat Sessions")
+        st.header("Chats")
         
         # New chat button
         if st.button("➕ New Chat", key="new_chat_button", type="primary"):
@@ -145,7 +145,7 @@ def main():
                 if msg.get('reference_docs'):
                     with st.expander("📚 View References"):
                         for ref_idx, reference in enumerate(msg['reference_docs'], 1):
-                            st.markdown(f"**Page Content:**\n> {reference['page_content']}")
+                            st.markdown(f"**Content:**\n> {reference['page_content']}")
                             # st.markdown(f"**Metadata:**")
                             st.markdown(f"- **Page:** {reference['metadata']['page_label']}")
                             # st.markdown(f"- **Page Label:** {reference['metadata']['page_label']}")
@@ -163,7 +163,7 @@ def main():
                     user_message,
                     st.session_state.current_session
                 )
-                print("Result >>>>>>>>>>>>>>>>>>>>>", result)
+                # print("Result >>>>>>>>>>>>>>>>>>>>>", result)
                 # Add to session history
                 current_chat['messages'].append({
                     'user_message': user_message,

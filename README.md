@@ -2,16 +2,22 @@
 
 JurisGuide is a Retrieval-Augmented Generation (RAG) based legal issues advisor chatbot. It leverages a state graph workflow to decide when to retrieve external legal documents and when to generate a response directly using an LLM. The project is designed as a conceptual MVP that can be adapted for various domains by simply updating the configuration variables.
 
-> **Note:** This project is open to contributions. If you have ideas for improvements, bug fixes, or new features, please feel free to open an issue or submit a pull request.
+## Screenshots
+
+<div style="display: flex; justify-content: space-between; margin: 20px 0;"> 
+   <img width="35%" alt="img01" src="https://github.com/user-attachments/assets/9dcdcc82-a43e-47f9-86e0-25f279c569b3" /> 
+   <img width="29%" alt="img02" src="https://github.com/user-attachments/assets/8684ca8c-144b-4a37-976a-9a8796b3de1b" />
+   <img width="35%" alt="img03" src="https://github.com/user-attachments/assets/93fb242a-387e-4578-b980-772f681a7517" /> 
+</div>
 
 ## Features
 
 - **Legal Advisor Chatbot:** Provides context-aware legal advice, definitions, and explanations.
 - **Retrieval-Augmented Generation:** Uses external documents as context when needed.
-- **Real-Time Streaming:** Displays the LLM’s response token-by-token.
+- **Real-Time Streaming:** Displays the LLM's response token-by-token.
 - **Session Management:** Supports multiple chat sessions with persistent conversation history.
 - **Configurable:** Easily update API keys, model names, and other parameters via environment variables.
-- **File Upload & Chunking:** Upload files to a dedicated `processed` folder that are automatically chunked when running the app.
+- **File Upload & Chunking:** Upload files to a dedicated processed folder that are automatically chunked when running the app.
 
 ## Folder Structure
 
@@ -32,17 +38,17 @@ JurisGuide/
 │   └── processed/           # Uploaded files are saved and automatically chunked
 │
 ├── .env                     # Environment variables file
-├── chatbot.py               # Chat interface that integrates with the workflow
-├── app.py                   # Streamlit application UI
-├── requirements.txt         # Python dependencies
-└── README.md                # This file
+├── chatbot.py              # Chat interface that integrates with the workflow
+├── app.py                  # Streamlit application UI
+├── requirements.txt        # Python dependencies
+└── README.md               # This file
 ```
 
 ## Configuration
 
 ### Environment Variables
 
-Create a `.env` file in the project root with the following contents:
+Create a .env file in the project root with the following contents:
 
 ```env
 LLM_API_KEY="YOUR-LLM-API-KEY"
@@ -50,11 +56,12 @@ LLM_MODEL="llama-3.2-3b-preview"
 VECTOR_STORE_PATH="data/chroma_db"
 DB_PATH="data/chat_history.db"
 ```
+
 For LLM, I have used the Groq API key but you can update it accordingly.
 
 ### Core Configuration
 
-The `core/config.py` file loads these values and defines additional settings:
+The core/config.py file loads these values and defines additional settings:
 
 ```python
 import os
@@ -110,7 +117,7 @@ This will open the app in your default web browser. The chatbot supports real-ti
 
 ## Data Folders
 
-- **data/chat_history.db:** The chat history database will be created automatically in the `data` folder.
+- **data/chat_history.db:** The chat history database will be created automatically in the data folder.
 - **data/chroma_db:** This folder is used as the vector store for document retrieval.
 - **data/processed:** Upload your files here. The app will automatically chunk these files when it runs.
 

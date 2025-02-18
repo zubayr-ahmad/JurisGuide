@@ -1,6 +1,6 @@
-# JurisGuide
+# Juris Guide
 
-JurisGuide is a Retrieval-Augmented Generation (RAG) based legal issues advisor chatbot. It leverages a state graph workflow to decide when to retrieve external legal documents and when to generate a response directly using an LLM. The project is designed as a conceptual MVP that can be adapted for various domains by simply updating the configuration variables.
+Juris Guide is a Retrieval-Augmented Generation (RAG) based legal issues advisor chatbot. It leverages a state graph workflow to decide when to retrieve external legal documents and when to generate a response directly using an LLM. The project is designed as a conceptual MVP that can be adapted for various domains by simply updating the configuration variables.
 
 ## Screenshots
 

@@ -82,7 +82,7 @@ def main():
     
     # Page configuration
     st.set_page_config(
-        page_title="Chatbot",
+        page_title="JurisGuide",
         layout="wide",
         initial_sidebar_state="expanded"
     )
@@ -121,7 +121,7 @@ def main():
         st.session_state.current_session = next(iter(st.session_state.sessions))
     
     # Main chat interface
-    st.title("Chatbot")
+    st.title("Juris Guide")
     
     # Get current chat data
     current_chat = st.session_state.sessions[st.session_state.current_session]

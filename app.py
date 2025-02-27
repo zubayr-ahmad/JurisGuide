@@ -1,3 +1,4 @@
+# app.py
 import streamlit as st
 import uuid
 from datetime import datetime
@@ -135,7 +136,7 @@ def main():
     # Display chat history
     with chat_container:
         for i, msg in enumerate(current_chat['messages'][::-1]):
-            with st.chat_message("user_message"):
+            with st.chat_message("user"):
                 st.write(msg['user_message'])
             
             with st.chat_message("assistant"):
@@ -146,9 +147,7 @@ def main():
                     with st.expander("📚 View References"):
                         for ref_idx, reference in enumerate(msg['reference_docs'], 1):
                             st.markdown(f"**Content:**\n> {reference['page_content']}")
-                            # st.markdown(f"**Metadata:**")
                             st.markdown(f"- **Page:** {reference['metadata']['page_label']}")
-                            # st.markdown(f"- **Page Label:** {reference['metadata']['page_label']}")
                             st.markdown(f"- **Source:** `{reference['metadata']['source']}`")
                             st.markdown("---")  # Adds a separator between references
     
@@ -156,37 +155,48 @@ def main():
     user_message = st.chat_input("Type your message here...")
     
     if user_message:
+        # Display user message
+        with st.chat_message("user"):
+            st.write(user_message)
+            
+        # Process and display assistant response
         with st.spinner("Thinking..."):
-            # Create a container for the assistant's streaming response.
+            # Create a container for the assistant's streaming response
             with st.chat_message("assistant"):
                 response_placeholder = st.empty()
+                reference_docs = []
                 full_response = ""
                 
-                # Get the generator from your chatbot
-                response_generator = st.session_state.chatbot.chat(
+                # Get the streaming response generator
+                for update in st.session_state.chatbot.chat(
                     user_message, st.session_state.current_session
-                )
-                print(response_generator)
-                # Iterate over the streaming generator.
-                for update in response_generator:
-                    # If we received a chunk, update the placeholder.
+                ):
+                    # If we received a chunk, update the placeholder
                     if "chunk" in update:
                         full_response = update["full_response"]
                         response_placeholder.markdown(full_response)
-                    # Optionally, process final payload metadata if available.
+                    
+                    # Process final update with metadata
                     if update.get("final"):
-                        # You can capture metadata here if needed.
-                        pass
+                        reference_docs = update.get("reference_docs", [])
                 
-            # Once streaming is done, add the message to the chat history.
+                # Show references if available
+                if reference_docs:
+                    with st.expander("📚 View References"):
+                        for ref_idx, reference in enumerate(reference_docs, 1):
+                            st.markdown(f"**Content:**\n> {reference['page_content']}")
+                            st.markdown(f"- **Page:** {reference['metadata']['page_label']}")
+                            st.markdown(f"- **Source:** `{reference['metadata']['source']}`")
+                            st.markdown("---")
+            
+            # Once streaming is done, add the message to the chat history
             current_chat['messages'].append({
                 'user_message': user_message,
                 'response': full_response,
-                # Update reference_docs if your generator returns them.
-                'reference_docs': update.get("reference_docs", [])
+                'reference_docs': reference_docs
             })
             
-            # Rerun to refresh the chat history display.
+            # Rerun to refresh the chat history display
             st.rerun()
 
 if __name__ == "__main__":

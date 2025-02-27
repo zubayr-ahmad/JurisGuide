@@ -1,4 +1,3 @@
-
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_groq import ChatGroq
 from typing import List, Any, Dict, TypedDict, Annotated, Optional
@@ -16,6 +15,8 @@ class ChatState(TypedDict):
     reference_docs: Optional[List[Any]]
     response: Optional[str]
     requires_retrieval: bool
+    context: str  # Added to store context for streaming outside the graph
+    chat_history: str  # Added to store history for streaming outside the graph
     history: List[Dict[str, Any]]
 
 # LLM Response Generation
@@ -24,7 +25,16 @@ class ResponseGenerator:
         self.llm = ChatGroq(api_key=LLM_API_KEY, 
                           model=LLM_MODEL)
 
-    def generate_response(self, context: str, history: str, query: str) -> str:
+    def generate_response(self, context: str, history: str, query: str) -> Dict:
+        """
+        Generate a response and return a dictionary with a placeholder.
+        The actual streaming happens outside the LangGraph workflow.
+        """
+        # Return a placeholder to satisfy LangGraph's requirement for a dict
+        return {"response": "Response will be streamed directly in the UI"}
+    
+    def get_stream(self, context: str, history: str, query: str):
+        """Method that returns the stream generator directly"""
         messages = [
             SystemMessage(content="""
             You are an AI assistant with expertise in various topics, including legal definitions, documentation, and general knowledge.
@@ -40,13 +50,12 @@ class ResponseGenerator:
             HumanMessage(content=f"Context:\n{context}\n\nConversation History:\n{history}\n\nUser Query:\n{query}\n\nResponse:")
         ]
 
-        return self.llm(messages).content
-
+        return self.llm.stream(messages)
     
     def custom_call(self, user_prompt, system_prompt=None):
         messages = [HumanMessage(content=user_prompt)]
         if system_prompt:
-            messages.insert(0, SystemMessage(system_prompt))
+            messages.insert(0, SystemMessage(content=system_prompt))
         return self.llm(messages).content
 
 # Chat Nodes Class
@@ -58,28 +67,31 @@ class ChatNodes:
 
     def retrieve_documents(self, state: ChatState) -> Dict:
         docs = self.retriever.retrieve_documents(state["user_message"])
-        return {"reference_docs": docs}
+        # Also prepare the context string for later streaming
+        context = "\n\n".join([doc.page_content for doc in docs])
+        return {"reference_docs": docs, "context": context}
 
     def generate_response(self, state: ChatState) -> Dict:
-        context = "\n\n".join([doc.page_content for doc in state["reference_docs"]])
+        # If no documents were retrieved, create the context here
+        if not state.get("context"):
+            context = "\n\n".join([doc.page_content for doc in state["reference_docs"]])
+        else:
+            context = state["context"]
+            
         history = "\n".join([f"User: {msg['user_message']}\nBot: {msg['response']}" 
                            for msg in state.get("history", [])[-HISTORY_CONTEXT:]])
-        response = self.generator.generate_response(
-            context=context,
-            history=history,
-            query=state["user_message"]
-        )
-        return {"response": response}    
-
-
+        
+        # Store context and history for later streaming
+        return {
+            "context": context,
+            "chat_history": history,
+            "response": "Response will be streamed directly in the UI"
+        }
 
     def save_conversation(self, state: ChatState) -> Dict:
-        self.db.save_chat(
-            state["session_id"],
-            state["user_message"],
-            state["response"],
-            reference_docs=state["reference_docs"]
-        )
+        # For now, the response is just a placeholder
+        # The actual response will be streamed directly in the UI
+        # We'll update the database after streaming is complete
         return {
             "history": [{
                 "user_message": state["user_message"],
